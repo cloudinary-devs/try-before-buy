@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdvancedImage } from '@cloudinary/react';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { generativeRecolor } from '@cloudinary/url-gen/actions/effect';
@@ -16,12 +16,36 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
   selectedColor,
   onAddToCart
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [cldImage, setCldImage] = useState<any>(null);
+
   // Initialize Cloudinary with the correct cloud name
   const cld = new Cloudinary({
     cloud: {
-      cloudName: 'cld-demo-ugc' // Using the provided cloud name
+      cloudName: 'cld-demo-ugc'
     }
   });
+
+  useEffect(() => {
+    if (!imagePublicId) return;
+    setIsLoading(true);
+    
+    const myImage = cld.image(imagePublicId).setDeliveryType('upload');
+    
+    if (selectedColor) {
+      myImage.effect(
+        generativeRecolor("wall", selectedColor.hexCode.substring(1)).detectMultiple()
+      );
+    }
+    
+    setCldImage(myImage);
+    
+    myImage.toURL(); // Ensure Cloudinary processes the transformation
+    
+    const imgCheck = new Image();
+    imgCheck.src = myImage.toURL();
+    imgCheck.onload = () => setIsLoading(false);
+  }, [imagePublicId, selectedColor]);
 
   if (!imagePublicId) {
     return (
@@ -31,53 +55,41 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
     );
   }
 
-  // Create a Cloudinary image
-  const myImage = cld.image(imagePublicId).setDeliveryType('upload');
-  
-  // Apply recolor effect only if a color is selected
-  if (selectedColor) {
-    myImage.effect(
-      generativeRecolor("wall", selectedColor.hexCode.substring(1)).detectMultiple()
-    );
-  }
-
-  // Debugging: Log the final image URL
-  useEffect(() => {
-    console.log("Generated Cloudinary Image URL:", myImage.toURL());
-  }, [imagePublicId, selectedColor]);
-
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       <div className="relative">
-        <AdvancedImage cldImg={myImage} className="w-full h-auto" />
+        {cldImage && <AdvancedImage cldImg={cldImage} className={`w-full h-auto ${isLoading ? 'opacity-50' : 'opacity-100 transition-opacity duration-300'}`} />}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600"></div>
+          </div>
+        )}
         <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-100">
           <Heart className="h-5 w-5 text-gray-600" />
         </button>
       </div>
       
       <div className="p-4">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-800">{selectedColor ? selectedColor.name : "Original Color"}</h3>
+            <p className="text-gray-600">Premium Interior Wall Paint</p>
+          </div>
+          {selectedColor && <p className="text-2xl font-bold text-indigo-600">${selectedColor.price.toFixed(2)}</p>}
+        </div>
+        
         {selectedColor && (
-          <>
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">{selectedColor.name}</h3>
-                <p className="text-gray-600">Premium Interior Wall Paint</p>
-              </div>
-              <p className="text-2xl font-bold text-indigo-600">${selectedColor.price.toFixed(2)}</p>
-            </div>
-            
-            <div className="flex space-x-2 mb-4">
-              <div className="h-6 w-6 rounded-full border border-gray-300" style={{ backgroundColor: selectedColor.hexCode }}></div>
-              <span className="text-sm text-gray-600">Color: {selectedColor.name}</span>
-            </div>
-          </>
+          <div className="flex space-x-2 mb-4">
+            <div className="h-6 w-6 rounded-full border border-gray-300" style={{ backgroundColor: selectedColor.hexCode }}></div>
+            <span className="text-sm text-gray-600">Color: {selectedColor.name}</span>
+          </div>
         )}
         
         <div className="flex space-x-4">
           <button 
             onClick={onAddToCart}
             className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition flex items-center justify-center"
-            disabled={!selectedColor} // Disable if no color selected
+            disabled={!selectedColor}
           >
             <ShoppingCart className="h-5 w-5 mr-2" />
             Add to Cart

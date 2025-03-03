@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AdvancedImage } from '@cloudinary/react';
 import { Cloudinary } from '@cloudinary/url-gen';
 import { generativeRecolor } from '@cloudinary/url-gen/actions/effect';
+import { limitFit } from '@cloudinary/url-gen/actions/resize';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { PaintColor } from '../types';
 
@@ -30,13 +31,19 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
     if (!imagePublicId) return;
     setIsLoading(true);
     
-    const myImage = cld.image(imagePublicId).setDeliveryType('upload');
+    let myImage = cld.image(imagePublicId).setDeliveryType('upload');
     
     if (selectedColor) {
       myImage.effect(
         generativeRecolor("wall", selectedColor.hexCode.substring(1)).detectMultiple()
       );
     }
+    
+    // Apply size limit after recoloring
+    myImage.resize(limitFit().width(736).height(500));
+    
+    // Optimize format and quality
+    myImage.format('auto').quality('auto');
     
     setCldImage(myImage);
     
@@ -57,8 +64,8 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-      <div className="relative">
-        {cldImage && <AdvancedImage cldImg={cldImage} className={`w-full h-auto ${isLoading ? 'opacity-50' : 'opacity-100 transition-opacity duration-300'}`} />}
+      <div className="relative flex justify-center items-center" style={{ maxWidth: '736px', maxHeight: '500px', margin: '0 auto' }}>
+        {cldImage && <AdvancedImage cldImg={cldImage} className={`max-w-full max-h-full ${isLoading ? 'opacity-50' : 'opacity-100 transition-opacity duration-300'}`} />}
         {isLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600"></div>

@@ -5,6 +5,7 @@ import { generativeRecolor } from '@cloudinary/url-gen/actions/effect';
 import { limitFit } from '@cloudinary/url-gen/actions/resize';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { PaintColor } from '../types';
+import { CLOUDINARY_CONFIG } from '../config/cloudinary'
 
 interface ColoredRoomPreviewProps {
   imagePublicId: string | null;
@@ -23,7 +24,7 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
   // Initialize Cloudinary with the correct cloud name
   const cld = new Cloudinary({
     cloud: {
-      cloudName: 'cld-demo-ugc'
+      cloudName: CLOUDINARY_CONFIG.cloudName
     }
   });
 

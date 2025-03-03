@@ -1,20 +1,13 @@
-import { Cloudinary } from '@cloudinary/url-gen';
-
-// Initialize Cloudinary instance
-export const cloudinary = new Cloudinary({
-  cloud: {
-    cloudName: 'cld-demo-ugc'
-  }
-});
+import { CLOUDINARY_CONFIG } from '../config/cloudinary'
 
 // Function to upload an image to Cloudinary
 export const uploadImage = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', 'try-before-buy');
+  formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
 
   try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/cld-demo-ugc/image/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`, {
       method: 'POST',
       body: formData
     });

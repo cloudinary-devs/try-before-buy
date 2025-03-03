@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ImageUploader from './components/ImageUploader';
 import ColorSwatch from './components/ColorSwatch';
 import ColoredRoomPreview from './components/ColoredRoomPreview';
 import { paintColors } from './data/paintColors';
-import { PaintColor } from './types';
 import { uploadImage } from './utils/cloudinaryUtils';
 
 function App() {

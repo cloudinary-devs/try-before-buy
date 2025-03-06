@@ -96,7 +96,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isLoading 
           )}
         </button>
         <p className="text-xs text-gray-500 mt-2">
-          Supported formats: JPG, PNG, WEBP
+          Supports any image format: e.g. JPG, PNG, WEBP
         </p>
       </div>
     </div>

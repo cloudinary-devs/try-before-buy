@@ -32,7 +32,7 @@ const ColoredRoomPreview: React.FC<ColoredRoomPreviewProps> = ({
     if (!imagePublicId) return;
     setIsLoading(true);
     
-    let myImage = cld.image(imagePublicId).setDeliveryType('upload');
+    let myImage = cld.image(imagePublicId);
     
     if (selectedColor) {
       myImage.effect(
